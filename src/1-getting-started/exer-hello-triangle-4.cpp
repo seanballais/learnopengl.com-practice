@@ -9,22 +9,27 @@ const char *vertexShaderSrc =
     "layout (location = 0) in vec3 aPos;\n"
     "layout (location = 1) in vec3 aColor;\n"
     "\n"
+    "out vec3 outPos;\n"
     "out vec3 outColor;\n"
+    "\n"
+    "uniform float offsetX;\n"
     "\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos, 1.0);\n"
+    "    outPos = vec3(aPos.x + offsetX, aPos.y, aPos.z);\n"
+    "    gl_Position = vec4(outPos, 1.0);\n"
     "    outColor = aColor;\n"
     "}\n";
 
 const char *fragShaderSrc =
     "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "in vec3 outPos;\n"
     "in vec3 outColor;\n"
     "\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(outColor, 1.0);\n"
+    "   FragColor = vec4(outColor + (outPos / 2), 1.0);\n"
     "}\n";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -175,14 +180,10 @@ int main()
         // Rendering methods here!
         glUseProgram(shaderProgram);
 
-        /* Code inside this comment block was used to transition the colour
-         * of the triangles from blue to black and back again.
-         * 
-         * float timeValue = glfwGetTime();
-         * float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-         * int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-         * glUniform4f(vertexColorLocation, 0.0f, 0.0f, greenValue, 1.0f);
-         */
+        float timeLapsed = glfwGetTime();
+        float offsetX = (sin(timeLapsed) / 2) + 0.25f;
+        int vertexOffetXLocation = glGetUniformLocation(shaderProgram, "offsetX");
+        glUniform1f(vertexOffetXLocation, offsetX);
 
         for (int vao : triangleVaos) {
             glBindVertexArray(vao);
